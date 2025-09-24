@@ -85,6 +85,35 @@ def ensure_schema():
         con.commit()
 
 ensure_schema()
+# === Seed: добавляем событие "Осенний вызов" один раз ===
+def seed_autumn_challenge_once():
+    title = "Челлендж «Осенний вызов»"
+    ds = "2025-10-20"   # дата начала (YYYY-MM-DD)
+    de = "2025-10-24"   # дата окончания (YYYY-MM-DD)
+    with db() as con:
+        cur = con.cursor()
+        # проверяем, не добавлено ли уже (по названию и датам)
+        cur.execute("SELECT 1 FROM events WHERE title=? AND date_start=? AND date_end=?", (title, ds, de))
+        if cur.fetchone():
+            return  # уже есть — ничего не делаем
+        # вставляем событие
+        cur.execute("""
+            INSERT INTO events(
+                emoji, title, date_start, date_end, location, capacity, description, rewards, is_active
+            ) VALUES (?,?,?,?,?,?,?,?,1)
+        """, (
+            "🔥",
+            title,
+            ds,
+            de,
+            "Онлайн",
+            None,  # без лимита
+            "5 дней, 3 активности: планка, баланс на 1 ноге, отжимания",
+            ""     # награды (можно заполнить позже)
+        ))
+        con.commit()
+
+seed_autumn_challenge_once()
 
 # === Utils ===
 RU_MONTHS_GEN = {
